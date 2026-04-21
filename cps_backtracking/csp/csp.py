@@ -65,3 +65,120 @@
 #         remove the assignment from the current course
 
 #     return false
+
+
+# function neighbors(name, constraints)
+#     result <- empty list
+
+#     for each constraint in constraints
+#         left, right <- split the constraint by "!="
+
+#         if name is equal to left
+#             add right to result
+#         else if name is equal to right
+#             add left to result
+
+#     return result
+
+
+# function arc satisfied(x val, y val, X, Y, constraints)
+#     for each constraint in constraints
+#         left, right <- split the constraint by "!="
+
+#         if (X is left and Y is right) or (X is right and Y is left)
+#             if x val is equal to y val
+#                 return false
+
+#     return true
+
+# function revise(X, Y, constraints)
+#     revised <- false
+
+#     for each x in a copy of X domain
+#         if no value y in Y domain satisfies arc satisfied(x, y, X, Y, constraints)
+#             remove x from X domain
+#             revised <- true
+
+#     return revised
+
+
+# function ac3(courses, constraints)
+#     course map <- dictionary of courses using the name as key
+#     queue <- empty deque
+
+#     for each constraint in constraints
+#         left, right <- split the constraint by "!="
+
+#         add (left, right) to queue
+#         add (right, left) to queue
+
+#     while queue is not empty
+#         x name, y name <- take the first element from queue
+#         X <- course with x name from course map
+#         Y <- course with y name from course map
+
+#         if revise(X, Y, constraints)
+#             if X domain is empty
+#                 return false
+#             for each z name in neighbors(x name, constraints)
+#                 if z name is not equal to y name
+#                     add (z name, x name) to queue
+
+#     return true
+
+# function select mrv(unassigned, constraints)
+#     return the course in unassigned with the smallest domain
+
+# function select degree(unassigned, constraints)
+#     unassigned names <- set of names of unassigned courses
+
+#     for each course compute degree as the number of constraints
+#         involving that course where the other variable is also unassigned
+
+#     return the course with the highest degree
+
+# function select mrv degree(unassigned, constraints)
+#     min size <- smallest domain size among unassigned courses
+#     candidates <- all unassigned courses whose domain size equals min size
+
+#     if there is only one candidate
+#         return that candidate
+
+#     unassigned names <- set of names of unassigned courses
+
+#     for each candidate compute degree as the number of constraints
+#         involving that candidate where the other variable is also unassigned
+
+#     return the candidate with the highest degree
+
+# function select first(unassigned, constraints)
+#     return the first course in unassigned
+
+# function backtracking with inference(unassigned, assigned, constraints, select var)
+#     if unassigned is empty
+#         return true
+
+#     course <- select var(unassigned, constraints)
+#     remaining <- all courses in unassigned except course
+
+#     for each day in a copy of course domain
+#         assign that day to the course
+
+#         if the assignment is not consistent
+#             remove the assignment from the course
+#             continue with the next day
+
+#         add course to assigned
+#         all courses <- assigned combined with remaining
+#         saved domains <- save a copy of the domain of every course in all courses
+#         set course domain to contain only that day
+#         inference ok <- ac3(all courses, constraints)
+
+#         if inference ok
+#             if backtracking with inference(remaining, assigned, constraints, select var)
+#                 return true
+
+#         restore the domain of every course from saved domains
+#         remove course from assigned
+#         remove the assignment from the course
+#     return false
