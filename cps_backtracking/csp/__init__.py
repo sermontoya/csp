@@ -1,5 +1,8 @@
 from .csp import (
     Course,
+    _arc_satisfied,
+    _degree,
+    _neighbors,
     ac3,
     backtracking,
     backtracking_with_inference,
@@ -13,6 +16,9 @@ from .csp import (
 
 __all__ = [
     "Course",
+    "_arc_satisfied",
+    "_degree",
+    "_neighbors",
     "initialize",
     "is_consistent",
     "backtracking",

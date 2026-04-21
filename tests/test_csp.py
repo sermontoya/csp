@@ -1,5 +1,8 @@
 from cps_backtracking.csp import (
     Course,
+    _arc_satisfied,
+    _degree,
+    _neighbors,
     ac3,
     backtracking,
     backtracking_with_inference,
@@ -386,6 +389,194 @@ def test_backtracking_with_inference_mrv_degree_satisfies_all_constraints():
     for constraint in constraints:
         left, right = constraint.split("!=")
         assert assignments[left] != assignments[right]
+
+
+def test_degree_returns_zero_when_no_constraints_match():
+    course_a = Course("A", ["Monday"])
+    unassigned_names = {"A", "B"}
+
+    assert _degree(course_a, unassigned_names, ["C!=D"]) == 0
+
+
+def test_degree_counts_constraint_where_course_is_on_left():
+    course_a = Course("A", ["Monday"])
+    unassigned_names = {"A", "B"}
+
+    assert _degree(course_a, unassigned_names, ["A!=B"]) == 1
+
+
+def test_degree_counts_constraint_where_course_is_on_right():
+    course_b = Course("B", ["Monday"])
+    unassigned_names = {"A", "B"}
+
+    assert _degree(course_b, unassigned_names, ["A!=B"]) == 1
+
+
+def test_degree_counts_multiple_matching_constraints():
+    course_a = Course("A", ["Monday"])
+    unassigned_names = {"A", "B", "C"}
+
+    assert _degree(course_a, unassigned_names, ["A!=B", "A!=C"]) == 2
+
+
+def test_degree_does_not_count_constraint_whose_other_variable_is_not_unassigned():
+    course_a = Course("A", ["Monday"])
+    unassigned_names = {"A"}
+
+    assert _degree(course_a, unassigned_names, ["A!=B"]) == 0
+
+
+def test_select_degree_picks_course_with_most_constraints_to_unassigned():
+    course_a = Course("A", ["Monday", "Tuesday"])
+    course_b = Course("B", ["Monday", "Tuesday"])
+    course_c = Course("C", ["Monday", "Tuesday"])
+    unassigned = [course_a, course_b, course_c]
+    constraints = ["A!=B", "A!=C", "B!=C"]
+
+    selected = select_degree(unassigned, constraints)
+
+    assert selected is course_a
+
+
+def test_select_degree_counts_constraints_on_either_side():
+    course_a = Course("A", ["Monday", "Tuesday"])
+    course_b = Course("B", ["Monday", "Tuesday"])
+    course_c = Course("C", ["Monday", "Tuesday"])
+    unassigned = [course_a, course_b, course_c]
+    constraints = ["B!=A", "C!=A"]
+
+    selected = select_degree(unassigned, constraints)
+
+    assert selected is course_a
+
+
+def test_select_degree_only_counts_unassigned_neighbors():
+    course_b = Course("B", ["Monday", "Tuesday"])
+    course_c = Course("C", ["Monday", "Tuesday"])
+    unassigned = [course_b, course_c]
+    constraints = ["A!=B", "A!=C", "B!=C"]
+
+    selected = select_degree(unassigned, constraints)
+
+    assert selected is course_b
+
+
+def test_select_degree_returns_single_unassigned_course():
+    course_a = Course("A", ["Monday"])
+
+    selected = select_degree([course_a], [])
+
+    assert selected is course_a
+
+
+def test_select_degree_returns_zero_degree_course_when_no_constraints_match():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday"])
+
+    selected = select_degree([course_a, course_b], ["C!=D"])
+
+    assert selected in (course_a, course_b)
+
+
+def test_select_mrv_picks_course_with_smallest_domain():
+    course_a = Course("A", ["Monday", "Tuesday", "Wednesday"])
+    course_b = Course("B", ["Monday", "Tuesday"])
+    course_c = Course("C", ["Monday"])
+
+    selected = select_mrv([course_a, course_b, course_c], [])
+
+    assert selected is course_c
+
+
+def test_select_mrv_returns_single_unassigned_course():
+    course_a = Course("A", ["Monday", "Tuesday"])
+
+    selected = select_mrv([course_a], [])
+
+    assert selected is course_a
+
+
+def test_select_mrv_ignores_constraints_when_choosing():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday", "Tuesday"])
+
+    selected = select_mrv([course_a, course_b], ["A!=B"])
+
+    assert selected is course_a
+
+
+def test_select_mrv_picks_first_minimum_on_tie():
+    course_a = Course("A", ["Monday", "Tuesday"])
+    course_b = Course("B", ["Monday", "Tuesday"])
+
+    selected = select_mrv([course_a, course_b], [])
+
+    assert selected is course_a
+
+
+def test_arc_satisfied_returns_true_when_values_differ():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Tuesday"])
+
+    assert _arc_satisfied("Monday", "Tuesday", course_a, course_b, ["A!=B"]) is True
+
+
+def test_arc_satisfied_returns_false_when_values_equal_and_constraint_applies():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday"])
+
+    assert _arc_satisfied("Monday", "Monday", course_a, course_b, ["A!=B"]) is False
+
+
+def test_arc_satisfied_returns_true_when_no_constraint_between_courses():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday"])
+
+    assert _arc_satisfied("Monday", "Monday", course_a, course_b, ["A!=C"]) is True
+
+
+def test_arc_satisfied_applies_constraint_regardless_of_operand_order():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday"])
+
+    assert _arc_satisfied("Monday", "Monday", course_a, course_b, ["B!=A"]) is False
+
+
+def test_arc_satisfied_returns_true_for_empty_constraints():
+    course_a = Course("A", ["Monday"])
+    course_b = Course("B", ["Monday"])
+
+    assert _arc_satisfied("Monday", "Monday", course_a, course_b, []) is True
+
+
+def test_neighbors_returns_names_connected_by_constraint():
+    result = _neighbors("A", ["A!=B", "A!=C"])
+
+    assert sorted(result) == ["B", "C"]
+
+
+def test_neighbors_includes_name_on_either_side_of_constraint():
+    result = _neighbors("B", ["A!=B"])
+
+    assert result == ["A"]
+
+
+def test_neighbors_returns_empty_when_no_constraints_match():
+    result = _neighbors("D", ["A!=B", "B!=C"])
+
+    assert result == []
+
+
+def test_neighbors_does_not_include_unrelated_names():
+    result = _neighbors("A", ["A!=B", "C!=D"])
+
+    assert result == ["B"]
+
+
+def test_neighbors_handles_empty_constraints():
+    result = _neighbors("A", [])
+
+    assert result == []
 
 
 def test_select_mrv_degree_picks_highest_degree_on_tie():

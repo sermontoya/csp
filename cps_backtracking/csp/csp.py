@@ -54,7 +54,7 @@ def backtracking(
     course: Course,
     remaining_courses: list[Course],
     assigned_courses: list[Course],
-    constraints,
+    constraints: list[str],
 ) -> bool:
     for day in course.domain:
         course.assign(day)
@@ -83,9 +83,7 @@ def backtracking(
     return False
 
 
-def neighbors(name, constraints):
-    #     result <- empty list
-
+def _neighbors(name: str, constraints: list[str]):
     #     for each constraint in constraints
     #         left, right <- split the constraint by "!="
 
@@ -95,10 +93,12 @@ def neighbors(name, constraints):
     #             add left to result
 
     #     return result
+
     raise Exception("Not implemented")
 
 
-def arc_satisfied(x, y, X, Y, constraints):
+def _arc_satisfied(x: str, y: str, X: Course, Y: Course, constraints: list[str]):
+
     #     for each constraint in constraints
     #         left, right <- split the constraint by "!="
 
@@ -110,7 +110,8 @@ def arc_satisfied(x, y, X, Y, constraints):
     raise Exception("Not implemented")
 
 
-def revise(X, Y, constraints):
+def revise(X: Course, Y: Course, constraints: list[str]):
+
     #     revised <- false
 
     #     for each x in a copy of X domain
@@ -122,7 +123,7 @@ def revise(X, Y, constraints):
     raise Exception("Not implemented")
 
 
-def ac3(courses, constraints):
+def ac3(courses: list[Course], constraints: list[str]):
     #     course map <- dictionary of courses using the name as key
     #     queue <- empty deque
 
@@ -148,12 +149,29 @@ def ac3(courses, constraints):
     raise Exception("Not implemented")
 
 
-def select_mrv(unassigned, constraints):
+def select_mrv(unassigned: list[Course], constraints: list[str]):
     #     return the course in unassigned with the smallest domain
     raise Exception("Not implemented")
 
 
-def select_degree(unassigned, constraints):
+def _degree(course: Course, unassigned_names, constraints: list[str]):
+    #     count <- 0
+
+    #     for each constraint in constraints
+    #         left, right <- split the constraint by "!="
+
+    #         if course name is equal to left and right is in unassigned names
+    #             increment count by 1
+
+    #         else if course name is equal to right and left is in unassigned names
+    #             increment count by 1
+
+    #     return count
+    raise Exception("Not implemented")
+
+
+def select_degree(unassigned: list[Course], constraints: list[str]):
+
     #     unassigned names <- set of names of unassigned courses
 
     #     for each course compute degree as the number of constraints
@@ -163,7 +181,7 @@ def select_degree(unassigned, constraints):
     raise Exception("Not implemented")
 
 
-def select_mrv_degree(unassigned, constraints):
+def select_mrv_degree(unassigned: list[Course], constraints: list[str]):
     #     min size <- smallest domain size among unassigned courses
     #     candidates <- all unassigned courses whose domain size equals min size
 
@@ -179,12 +197,17 @@ def select_mrv_degree(unassigned, constraints):
     raise Exception("Not implemented")
 
 
-def select_first(unassigned, constraints):
+def select_first(unassigned: list[Course], constraints: list[str]):
     #     return the first course in unassigned
     raise Exception("Not implemented")
 
 
-def backtracking_with_inference(unassigned, assigned, constraints, select=select_first):
+def backtracking_with_inference(
+    unassigned: list[Course],
+    assigned: list[Course],
+    constraints: list[str],
+    select=select_first,
+):
     #     if unassigned is empty
     #         return true
 
